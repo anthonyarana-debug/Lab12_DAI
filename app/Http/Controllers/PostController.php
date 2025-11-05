@@ -10,12 +10,12 @@ class PostController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth'); // Requiere autenticación
+        $this->middleware('auth');
     }
 
     public function index()
     {
-        $posts = Post::with('user')->get(); // Carga posts con sus usuarios
+        $posts = Post::with('user')->get();
         return view('posts.index', compact('posts'));
     }
 
@@ -42,6 +42,7 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
+        $post->load('comments.user'); 
         return view('posts.show', compact('post'));
     }
 
@@ -82,4 +83,3 @@ class PostController extends Controller
         return redirect()->route('posts.index')->with('success', 'Publicación eliminada.');
     }
 }
-
