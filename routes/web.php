@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CommentController; 
+use App\Http\Controllers\NotaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,6 +14,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::resource('posts', PostController::class);
 
 Route::middleware(['auth'])->group(function () {
-    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::resource('comments', CommentController::class)->only(['store', 'destroy']);
 });
+
+Route::get('/notas', [NotaController::class, 'index'])->name('notas.index');
+Route::post('/notas', [NotaController::class, 'store'])->name('notas.store');
