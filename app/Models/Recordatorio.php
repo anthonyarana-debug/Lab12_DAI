@@ -11,6 +11,11 @@ class Recordatorio extends Model
 
     protected $fillable = ['nota_id', 'fecha_vencimiento', 'completado'];
 
+    protected $casts = [
+        'fecha_vencimiento' => 'datetime',
+        'completado' => 'boolean',
+    ];
+
     public function nota()
     {
         return $this->belongsTo(Nota::class);
