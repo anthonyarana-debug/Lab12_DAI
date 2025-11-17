@@ -36,4 +36,9 @@ class Nota extends Model
     {
         return $this->hasOne(Recordatorio::class);
     }
+
+    public function actividades()
+    {
+        return $this->hasMany(Actividad::class);
+    }
 }
