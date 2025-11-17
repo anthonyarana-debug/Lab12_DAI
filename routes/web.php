@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotaController;
+use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\PostController;      
 use App\Http\Controllers\CommentController;   
 
@@ -16,6 +17,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::resource('posts', PostController::class);
 
 Route::middleware(['auth'])->group(function () {
+    Route::resource('actividades', ActividadController::class);
     Route::resource('comments', CommentController::class)->only(['store', 'destroy']);
 });
 
