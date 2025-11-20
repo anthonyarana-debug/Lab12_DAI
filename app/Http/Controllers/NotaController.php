@@ -15,7 +15,9 @@ class NotaController extends Controller
             ->addSelect([
                 'total_notas' => Nota::selectRaw('count(*)')
                     ->whereColumn('user_id', 'users.id')
-                    ->whereHas('recordatorio', fn($query) => $query->where('fecha_vencimiento', '>=', now()))
+                    ->whereHas('recordatorio', fn($query) => 
+                        $query->where('fecha_vencimiento', '>=', now())
+                    )
             ])
             ->get();
 
@@ -31,13 +33,13 @@ class NotaController extends Controller
             'fecha_vencimiento' => 'required|date|after:now',
         ]);
 
-        $note = Nota::create([
+        $nota = Nota::create([
             'user_id' => $validated['user_id'],
             'titulo' => $validated['titulo'],
             'contenido' => $validated['contenido'],
         ]);
 
-        $note->recordatorio()->create([
+        $nota->recordatorio()->create([
             'fecha_vencimiento' => $validated['fecha_vencimiento'],
         ]);
 
@@ -53,6 +55,44 @@ class NotaController extends Controller
         $nota->load(['recordatorio', 'actividades']);
 
         return view('notas.show', compact('nota'));
+    }
+
+    public function edit(Nota $nota)
+    {
+        if ($nota->user_id !== Auth::id()) {
+            abort(403, 'No autorizado para editar esta nota.');
+        }
+
+        $nota->load('recordatorio');
+
+        return view('notas.edit', compact('nota'));
+    }
+
+    public function update(Request $request, Nota $nota)
+    {
+        if ($nota->user_id !== Auth::id()) {
+            abort(403, 'No autorizado para actualizar esta nota.');
+        }
+
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
+            'fecha_vencimiento' => 'required|date|after:now',
+        ]);
+
+        // Actualiza Nota
+        $nota->update([
+            'titulo' => $validated['titulo'],
+            'contenido' => $validated['contenido'],
+        ]);
+
+        // Actualiza Recordatorio
+        $nota->recordatorio->update([
+            'fecha_vencimiento' => $validated['fecha_vencimiento'],
+        ]);
+
+        return redirect()->route('notas.show', $nota)
+            ->with('success', 'Nota actualizada exitosamente.');
     }
 
     public function destroy(Nota $nota)

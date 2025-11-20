@@ -24,14 +24,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('comments', CommentController::class)
         ->only(['store', 'destroy']);
 
-    Route::get('/notas/{nota}', [NotaController::class, 'show'])->name('notas.show');
-
-    Route::delete('/notas/{nota}', [NotaController::class, 'destroy'])
-        ->name('notas.destroy');
+    Route::resource('notas', NotaController::class)->except(['create']);
 });
-
-Route::get('/notas', [NotaController::class, 'index'])
-    ->name('notas.index');
-
-Route::post('/notas', [NotaController::class, 'store'])
-    ->name('notas.store');

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actividad;
-use App\Models\Nota; 
+use App\Models\Nota;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
 
 class ActividadController extends Controller
 {
@@ -17,15 +17,17 @@ class ActividadController extends Controller
     public function index()
     {
         $actividades = Actividad::whereHas('nota', function ($query) {
-            $query->where('user_id', Auth::id());
-        })->with('nota')->latest()->get(); 
+            $query->where('user_id', Auth::id())->withoutGlobalScopes();
+        })->with(['nota' => function ($query) {
+            $query->withTrashed()->withoutGlobalScopes();
+        }])->latest()->get();
 
         return view('actividades.index', compact('actividades'));
     }
 
     public function create()
     {
-        $notas = Auth::user()->notas;
+        $notas = Auth::user()->notas()->withTrashed()->get();
 
         return view('actividades.create', compact('notas'));
     }
@@ -33,7 +35,7 @@ class ActividadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nota_id' => 'required|exists:notas,id', 
+            'nota_id' => 'required|exists:notas,id',
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
         ]);
@@ -47,7 +49,7 @@ class ActividadController extends Controller
             'nota_id' => $request->nota_id,
             'titulo' => $request->titulo,
             'descripcion' => $request->descripcion,
-            'completada' => false, 
+            'completada' => false,
         ]);
 
         return redirect()->route('notas.index')->with('success', 'Actividad creada exitosamente.');
@@ -55,12 +57,17 @@ class ActividadController extends Controller
 
     public function show(Actividad $actividad)
     {
-        $actividad->load('nota');
+        // Carga la relación 'nota' IGNORANDO el scope global 'activa' y incluyendo eliminadas suavemente
+        $actividad->load(['nota' => function ($query) {
+            $query->withTrashed()->withoutGlobalScope('activa');
+        }]);
 
+        // Verifica si la relación 'nota' existe
         if (!$actividad->nota) {
             abort(404, 'La nota asociada a esta actividad no existe.');
         }
 
+        // Ahora verifica si el usuario autenticado es el dueño de la nota
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para ver esta actividad.');
         }
@@ -70,29 +77,39 @@ class ActividadController extends Controller
 
     public function edit(Actividad $actividad)
     {
-        $actividad->load('nota');
+        // Carga la relación 'nota' IGNORANDO el scope global 'activa' y incluyendo eliminadas suavemente
+        $actividad->load(['nota' => function ($query) {
+            $query->withTrashed()->withoutGlobalScope('activa');
+        }]);
 
+        // Verifica si la relación 'nota' existe
         if (!$actividad->nota) {
             abort(404, 'La nota asociada a esta actividad no existe.');
         }
 
+        // Ahora verifica si el usuario autenticado es el dueño de la nota
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para editar esta actividad.');
         }
 
-        $notas = Auth::user()->notas;
+        $notas = Auth::user()->notas()->withTrashed()->get();
 
         return view('actividades.edit', compact('actividad', 'notas'));
     }
 
     public function update(Request $request, Actividad $actividad)
     {
-        $actividad->load('nota');
+        // Carga la relación 'nota' IGNORANDO el scope global 'activa' y incluyendo eliminadas suavemente
+        $actividad->load(['nota' => function ($query) {
+            $query->withTrashed()->withoutGlobalScope('activa');
+        }]);
 
+        // Verifica si la relación 'nota' existe
         if (!$actividad->nota) {
             abort(404, 'La nota asociada a esta actividad no existe.');
         }
 
+        // Ahora verifica si el usuario autenticado es el dueño de la nota
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para actualizar esta actividad.');
         }
@@ -100,7 +117,7 @@ class ActividadController extends Controller
         $request->validate([
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'completada' => 'boolean', 
+            'completada' => 'boolean',
         ]);
 
         $actividad->update([
@@ -114,12 +131,17 @@ class ActividadController extends Controller
 
     public function destroy(Actividad $actividad)
     {
-        $actividad->load('nota');
+        // Carga la relación 'nota' IGNORANDO el scope global 'activa'
+        $actividad->load(['nota' => function ($query) {
+            $query->withoutGlobalScope('activa');
+        }]);
 
+        // Verifica si la relación 'nota' existe
         if (!$actividad->nota) {
             abort(404, 'La nota asociada a esta actividad no existe.');
         }
 
+        // Ahora verifica si el usuario autenticado es el dueño de la nota
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para eliminar esta actividad.');
         }
