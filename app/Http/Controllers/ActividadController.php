@@ -21,7 +21,6 @@ class ActividadController extends Controller
         })->with('nota')->latest()->get(); 
 
         return view('actividades.index', compact('actividades'));
-
     }
 
     public function create()
@@ -51,22 +50,32 @@ class ActividadController extends Controller
             'completada' => false, 
         ]);
 
-        return redirect()->route('notas.show', $nota->id)->with('success', 'Actividad creada exitosamente.');
+        return redirect()->route('notas.index')->with('success', 'Actividad creada exitosamente.');
     }
 
     public function show(Actividad $actividad)
     {
+        $actividad->load('nota');
+
+        if (!$actividad->nota) {
+            abort(404, 'La nota asociada a esta actividad no existe.');
+        }
+
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para ver esta actividad.');
         }
-
-        $actividad->load('nota');
 
         return view('actividades.show', compact('actividad'));
     }
 
     public function edit(Actividad $actividad)
     {
+        $actividad->load('nota');
+
+        if (!$actividad->nota) {
+            abort(404, 'La nota asociada a esta actividad no existe.');
+        }
+
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para editar esta actividad.');
         }
@@ -78,6 +87,12 @@ class ActividadController extends Controller
 
     public function update(Request $request, Actividad $actividad)
     {
+        $actividad->load('nota');
+
+        if (!$actividad->nota) {
+            abort(404, 'La nota asociada a esta actividad no existe.');
+        }
+
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para actualizar esta actividad.');
         }
@@ -99,6 +114,12 @@ class ActividadController extends Controller
 
     public function destroy(Actividad $actividad)
     {
+        $actividad->load('nota');
+
+        if (!$actividad->nota) {
+            abort(404, 'La nota asociada a esta actividad no existe.');
+        }
+
         if ($actividad->nota->user_id !== Auth::id()) {
             abort(403, 'No autorizado para eliminar esta actividad.');
         }

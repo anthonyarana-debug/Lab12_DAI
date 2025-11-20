@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\PostController;      
-use App\Http\Controllers\CommentController;   
+use App\Http\Controllers\CommentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -12,15 +12,26 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+    ->name('home');
 
 Route::resource('posts', PostController::class);
 
 Route::middleware(['auth'])->group(function () {
+
     Route::resource('actividades', ActividadController::class);
-    Route::resource('comments', CommentController::class)->only(['store', 'destroy']);
-    Route::delete('/notas/{nota}', [NotaController::class, 'destroy'])->name('notas.destroy');
+
+    Route::resource('comments', CommentController::class)
+        ->only(['store', 'destroy']);
+
+    Route::get('/notas/{nota}', [NotaController::class, 'show'])->name('notas.show');
+
+    Route::delete('/notas/{nota}', [NotaController::class, 'destroy'])
+        ->name('notas.destroy');
 });
 
-Route::get('/notas', [NotaController::class, 'index'])->name('notas.index');
-Route::post('/notas', [NotaController::class, 'store'])->name('notas.store');
+Route::get('/notas', [NotaController::class, 'index'])
+    ->name('notas.index');
+
+Route::post('/notas', [NotaController::class, 'store'])
+    ->name('notas.store');

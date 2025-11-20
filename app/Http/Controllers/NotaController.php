@@ -44,6 +44,17 @@ class NotaController extends Controller
         return redirect()->route('notas.index')->with('success', 'Nota creada!');
     }
 
+    public function show(Nota $nota)
+    {
+        if ($nota->user_id !== Auth::id()) {
+            abort(403, 'No autorizado para ver esta nota.');
+        }
+
+        $nota->load(['recordatorio', 'actividades']);
+
+        return view('notas.show', compact('nota'));
+    }
+
     public function destroy(Nota $nota)
     {
         if ($nota->user_id !== Auth::id()) {
