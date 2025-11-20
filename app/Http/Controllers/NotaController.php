@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Nota;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
 
 class NotaController extends Controller
 {
@@ -41,5 +42,16 @@ class NotaController extends Controller
         ]);
 
         return redirect()->route('notas.index')->with('success', 'Nota creada!');
+    }
+
+    public function destroy(Nota $nota)
+    {
+        if ($nota->user_id !== Auth::id()) {
+            abort(403, 'No autorizado para eliminar esta nota.');
+        }
+
+        $nota->delete();
+
+        return redirect()->route('notas.index')->with('success', 'Nota eliminada exitosamente.');
     }
 }

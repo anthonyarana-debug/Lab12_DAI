@@ -75,6 +75,16 @@
                                     @endif
                                     )
                                 </small>
+
+                                <div class="mt-2">
+                                    <form method="POST" action="{{ route('notas.destroy', $nota) }}" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta nota? Esta acción también eliminará su recordatorio y todas sus actividades.')">
+                                            Eliminar Nota
+                                        </button>
+                                    </form>
+                                </div>
                             </li>
                         @endforeach
                     </ul>

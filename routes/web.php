@@ -19,6 +19,7 @@ Route::resource('posts', PostController::class);
 Route::middleware(['auth'])->group(function () {
     Route::resource('actividades', ActividadController::class);
     Route::resource('comments', CommentController::class)->only(['store', 'destroy']);
+    Route::delete('/notas/{nota}', [NotaController::class, 'destroy'])->name('notas.destroy');
 });
 
 Route::get('/notas', [NotaController::class, 'index'])->name('notas.index');

@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('actividades', function (Blueprint $table) {
+        Schema::create('actividades', function (Blueprint $table) { 
             $table->id();
-            $table->foreignId('nota_id')->constrained()->onDelete('cascade'); // FK a notas
+            $table->foreignId('nota_id')->constrained()->onDelete('cascade');
             $table->string('titulo');
             $table->text('descripcion')->nullable();
             $table->boolean('completada')->default(false);
@@ -20,6 +20,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('actividades');
+        Schema::dropIfExists('actividades'); 
     }
 };
